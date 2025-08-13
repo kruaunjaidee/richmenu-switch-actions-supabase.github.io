@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LINE Rich Menu Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #f3e8ff, #dbeafe);
+      font-family: 'Arial', sans-serif;
+    }
+    .btn {
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+    }
+    .card {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .loader-content {
+      text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #7983ff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .cute-text {
+      font-size: 1.2rem;
+      color: #333;
+      animation: bounce 1s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .emoji {
+      font-size: 2rem;
+      animation: rotate 2s linear infinite;
+    }
+    @keyframes rotate {
+      to { transform: rotate(360deg); }
+    }
+    .drop-container {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px dashed #555;
+      color: #444;
+      cursor: pointer;
+      transition: background .2s ease-in-out, border .2s ease-in-out;
+      background: #f9f9f9;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .drop-container:hover {
+      background: #eee;
+      border-color: #111;
+    }
+    .drop-container:hover .drop-title {
+      color: #222;
+    }
+    .drop-title {
+      color: #444;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      transition: color .2s ease-in-out;
+    }
+    input[type=file] {
+      width: 350px;
+      max-width: 100%;
+      color: #444;
+      padding: 5px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #555;
+      cursor: pointer;
+    }
+    input[type=file]::file-selector-button {
+      margin-right: 20px;
+      border: none;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s ease-in-out, transform .2s ease-in-out;
+      font-weight: bold;
+    }
+    input[type=file]::file-selector-button:hover {
+      background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+      transform: scale(1.05);
+    }
+    .drop-container.drag-active {
+      background: #eee;
+      border-color: #111;
+    }
+    .drop-container.drag-active .drop-title {
+      color: #222;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8" onload="init()">
+  <div id="loader" class="flex">
+    <div class="loader-content">
+      <div class="emoji">🐶</div>
+      <div class="spinner"></div>
+      <p class="cute-text">Loading... Please wait! 🌟</p>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-center mb-8 text-purple-700">LINE Rich Menu Manager V.6.8</h1>
+
+    <!-- Token Management Section -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8 card">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600">Channel Access Token Management</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">LINE Bot Name</label>
+          <input id="nameInput" type="text" class="w-full border rounded p-2" placeholder="Enter Bot Name">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Channel Access Token</label>
+          <input id="tokenInput" type="text" class="w-full border rounded p-2" placeholder="Enter or select token">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Select LINE Bot</label>
+          <select id="tokenSelect" class="w-full border rounded p-2">
+            <option value="">Select Bot</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button onclick="saveNewToken()" class="btn bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-2 px-4 rounded-full">Save Token to Sheet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8 card">
+      <h2 class="text-2xl font-semibold mb-4 text-blue-600">Create / Manage Rich Menu</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">JSON Rich Menu</label>
+          <textarea id="jsonInput" class="w-full h-40 border rounded p-2" placeholder='{"size": {"width": 2500, "height": 1686}, "selected": true, ...}'></textarea>
+        </div>
+        <label for="images" class="drop-container" id="dropcontainer">
+          <span class="drop-title">วางไฟล์ที่นี่</span>
+          หรือ
+          <input type="file" id="images" accept="image/*" required>
+        </label>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Rich Menu ID (from LINE)</label>
+          <input id="richMenuId" type="text" class="w-full border rounded p-2" placeholder="e.g., richmenu-1234567890">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Rich Menu Alias</label>
+          <input id="alias" type="text" class="w-full border rounded p-2" placeholder="e.g., main-menu">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">User ID (for Link/Unlink)</label>
+          <input id="userId" type="text" class="w-full border rounded p-2" placeholder="e.g., U1234567890">
+        </div>
+      </div>
+      <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button onclick="handleCreate()" class="btn bg-gradient-to-r from-green-400 to-blue-500 text-white py-2 px-4 rounded-full">Create Rich Menu</button>
+        <button onclick="handleUploadImage()" class="btn bg-gradient-to-r from-purple-400 to-pink-500 text-white py-2 px-4 rounded-full">Upload Image</button>
+        <button onclick="handleSetAlias()" class="btn bg-gradient-to-r from-indigo-400 to-blue-500 text-white py-2 px-4 rounded-full">Set Alias</button>
+        <button onclick="handleSetDefault()" class="btn bg-gradient-to-r from-green-500 to-teal-400 text-white py-2 px-4 rounded-full">Set Default</button>
+        <button onclick="handleDeleteAlias()" class="btn bg-gradient-to-r from-red-400 to-orange-500 text-white py-2 px-4 rounded-full">Delete Alias</button>
+        <button onclick="handleDeleteRichMenu()" class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white py-2 px-4 rounded-full">Delete Rich Menu</button>
+        <!-- <button onclick="handleSetAlarmDefault()" class="btn bg-gradient-to-r from-cyan-400 to-blue-500 text-white py-2 px-4 rounded-full">Set Alarm Default</button> -->
+        <button onclick="handleLinkToUser()" class="btn bg-gradient-to-r from-lime-400 to-green-500 text-white py-2 px-4 rounded-full">Link to User</button>
+        <button onclick="handleUnlinkFromUser()" class="btn bg-gradient-to-r from-orange-400 to-red-500 text-white py-2 px-4 rounded-full">Unlink from User</button>
+        <button onclick="handleCancelDefault()" class="btn bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-full">Cancel Default</button>
+        <button onclick="handleDeleteAllRichMenu()" class="btn bg-gradient-to-r from-red-500 to-black text-white py-2 px-4 rounded-full">Delete All Rich Menu</button>
+      </div>
+      <div id="response" class="mt-4 p-4 bg-gray-100 rounded"></div>
+    </div>
+
+    <!-- List Section (CRUD) -->
+    <div class="bg-white p-6 rounded-xl shadow-lg card">
+      <h2 class="text-2xl font-semibold mb-4 text-green-600">Rich Menus List</h2>
+      <button onclick="refreshList()" class="btn bg-blue-500 text-white py-2 px-4 rounded-full mb-4">Refresh List from API</button>
+      <div id="richmenuList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+    </div>
+  </div>
+  <footer style="color: green; padding: 10px; text-align: center; width: 100%; bottom: 0; left: 0;">
+    <center>
+      <img src="https://aliyahaunjo.github.io/image/kruaun.png" width="30px">©️ พัฒนาโดย ครูอั๋น ใจดี : <span id="year"></span>
+    </center>
+  </footer>
+
+  <script>
+    const supabase = Supabase.createClient('https://mihtvcbzguzkvfwnlnem.supabase.co/functions/v1/richmenu-service');
+
+    function init() {
+      populateTokens();
+      refreshList();
+      const d = new Date();
+      document.getElementById('year').textContent = d.toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+      const dropContainer = document.getElementById("dropcontainer");
+      const fileInput = document.getElementById("images");
+      dropContainer.addEventListener("dragover", (e) => e.preventDefault(), false);
+      dropContainer.addEventListener("dragenter", () => dropContainer.classList.add("drag-active"));
+      dropContainer.addEventListener("dragleave", () => dropContainer.classList.remove("drag-active"));
+      dropContainer.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropContainer.classList.remove("drag-active");
+        fileInput.files = e.dataTransfer.files;
+      });
+    }
+
+    function showLoader() {
+      document.getElementById('loader').style.display = 'flex';
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function shootConfetti() {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function setIdToInput(id) {
+      document.getElementById('richMenuId').value = id;
+    }
+
+    async function populateTokens() {
+      showLoader();
+      try {
+        const { data, error } = await supabase.functions.invoke('get-tokens', { method: 'GET' });
+        if (error) throw error;
+        const select = document.getElementById('tokenSelect');
+        select.innerHTML = '<option value="">Select Bot</option>';
+        data.forEach(t => {
+          const option = document.createElement('option');
+          option.value = t.token;
+          option.textContent = t.name;
+          select.appendChild(option);
+        });
+        select.addEventListener('change', () => {
+          document.getElementById('tokenInput').value = select.value;
+        });
+        shootConfetti();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function saveNewToken() {
+      const name = document.getElementById('nameInput').value.trim();
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!name || !token) return alert('Please enter both Bot Name and Token');
+      showLoader();
+      try {
+        const { error } = await supabase.functions.invoke('save-token', {
+          body: JSON.stringify({ name, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        await populateTokens();
+        alert('Token saved to database');
+        document.getElementById('nameInput').value = '';
+        document.getElementById('tokenInput').value = '';
+        shootConfetti();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    function showResponse(message, isSuccess) {
+      const respDiv = document.createElement('div');
+      respDiv.className = `p-2 rounded ${isSuccess ? 'bg-green-200' : 'bg-red-200'}`;
+      respDiv.textContent = message;
+      document.getElementById('response').appendChild(respDiv);
+      if (isSuccess) shootConfetti();
+    }
+
+    function getToken() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) {
+        showResponse('Please enter or select a Channel Access Token', false);
+        throw new Error('No token');
+      }
+      return token;
+    }
+
+    async function handleCreate() {
+      try {
+        const token = getToken();
+        const json = document.getElementById('jsonInput').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('create-rich-menu', {
+          body: JSON.stringify({ json, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? `Created ID: ${data.data.richMenuId}` : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleUploadImage() {
+      try {
+        const token = getToken();
+        const id = document.getElementById('richMenuId').value;
+        const fileInput = document.getElementById('images');
+        const file = fileInput.files[0];
+        if (!file) {
+          showResponse('Please select an image file', false);
+          return;
+        }
+        if (file.size > 1024 * 1024) {
+          showResponse('File size exceeds 1MB limit', false);
+          return;
+        }
+        showLoader();
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const base64 = e.target.result.split(',')[1];
+          try {
+            const { data, error } = await supabase.functions.invoke('upload-rich-menu-image', {
+              body: JSON.stringify({ richMenuId: id, base64, token }),
+              method: 'POST'
+            });
+            if (error) throw error;
+            showResponse(data.success ? 'Image uploaded' : data.error, data.success);
+          } catch (err) {
+            showResponse('Error: ' + err.message, false);
+          } finally {
+            hideLoader();
+          }
+        };
+        reader.onerror = function() {
+          showResponse('Error reading file', false);
+          hideLoader();
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+        hideLoader();
+      }
+    }
+
+    async function handleSetAlias() {
+      try {
+        const token = getToken();
+        const id = document.getElementById('richMenuId').value;
+        const alias = document.getElementById('alias').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('set-rich-menu-alias', {
+          body: JSON.stringify({ richMenuId: id, alias, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Alias set' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleSetDefault() {
+      try {
+        const token = getToken();
+        const id = document.getElementById('richMenuId').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('set-default-rich-menu', {
+          body: JSON.stringify({ richMenuId: id, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Set as default' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleDeleteAlias() {
+      try {
+        const token = getToken();
+        const alias = document.getElementById('alias').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('delete-rich-menu-alias', {
+          body: JSON.stringify({ alias, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Alias deleted' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleDeleteRichMenu() {
+      try {
+        const token = getToken();
+        const id = document.getElementById('richMenuId').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('delete-rich-menu', {
+          body: JSON.stringify({ richMenuId: id, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Rich Menu deleted' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleLinkToUser() {
+      try {
+        const token = getToken();
+        const userId = document.getElementById('userId').value;
+        const richMenuId = document.getElementById('richMenuId').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('link-rich-menu-to-user', {
+          body: JSON.stringify({ userId, richMenuId, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Linked to User' : data.error, data.success);
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleUnlinkFromUser() {
+      try {
+        const token = getToken();
+        const userId = document.getElementById('userId').value;
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('unlink-rich-menu-from-user', {
+          body: JSON.stringify({ userId, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Unlinked from User' : data.error, data.success);
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleCancelDefault() {
+      try {
+        const token = getToken();
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('cancel-default-rich-menu', {
+          body: JSON.stringify({ token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Cancelled Default' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function handleDeleteAllRichMenu() {
+      try {
+        const token = getToken();
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('delete-all-rich-menus', {
+          body: JSON.stringify({ token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        showResponse(data.success ? 'Deleted All Rich Menu' : data.error, data.success);
+        await refreshList();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function refreshList() {
+      try {
+        const token = getToken();
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('fetch-rich-menus', {
+          body: JSON.stringify({ token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        if (data.error) {
+          showResponse(data.error, false);
+          return;
+        }
+        const container = document.getElementById('richmenuList');
+        container.innerHTML = '';
+        data.forEach(item => {
+          const imgSrc = item.base64 ? `data:image/png;base64,${item.base64}` : '';
+          const card = document.createElement('div');
+          card.className = 'p-4 border rounded-lg bg-white shadow-md';
+          card.innerHTML = `
+            <img src="${imgSrc}" alt="Rich Menu Image" class="w-full h-32 object-cover mb-2 rounded">
+            <p><strong>ID:</strong> <span onclick="setIdToInput('${item.id}')" class="cursor-pointer text-blue-500 underline">${item.id}</span></p>
+            <p><strong>Chat Bar Text:</strong> ${item.chatBarText}</p>
+            <p><strong>Alias:</strong> ${item.alias}</p>
+            <p><strong>Size:</strong> ${item.size.width}x${item.size.height}</p>
+            <p><strong>Status:</strong> ${item.selected ? 'Active' : 'No'}</p>
+            <button onclick="setAsDefault('${item.id}')" class="btn bg-teal-400 text-white py-1 px-2 rounded mt-2">Set Default</button>
+            <button onclick="deleteThis('${item.id}')" class="btn bg-red-400 text-white py-1 px-2 rounded mt-2">Delete</button>
+          `;
+          container.appendChild(card);
+        });
+        shootConfetti();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function setAsDefault(id) {
+      try {
+        const token = getToken();
+        showLoader();
+        const { data, error } = await supabase.functions.invoke('set-default-rich-menu', {
+          body: JSON.stringify({ richMenuId: id, token }),
+          method: 'POST'
+        });
+        if (error) throw error;
+        await refreshList();
+        shootConfetti();
+      } catch (err) {
+        showResponse('Error: ' + err.message, false);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function deleteThis(id) {
+      if (confirm('Confirm delete?')) {
+        try {
+          const token = getToken();
+          showLoader();
+          const { data, error } = await supabase.functions.invoke('delete-rich-menu', {
+            body: JSON.stringify({ richMenuId: id, token }),
+            method: 'POST'
+          });
+          if (error) throw error;
+          await refreshList();
+          shootConfetti();
+        } catch (err) {
+          showResponse('Error: ' + err.message, false);
+        } finally {
+          hideLoader();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
