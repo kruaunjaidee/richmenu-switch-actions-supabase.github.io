@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LINE Rich Menu Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <style>
     body {
       background: linear-gradient(to bottom right, #f3e8ff, #dbeafe);
       font-family: 'Arial', sans-serif;
     }
+
     .btn {
       transition: all 0.3s ease;
     }
+
     .btn:hover {
       transform: scale(1.05);
     }
+
     .card {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
+
     #loader {
       display: none;
       position: fixed;
@@ -33,9 +37,11 @@
       justify-content: center;
       align-items: center;
     }
+
     .loader-content {
       text-align: center;
     }
+
     .spinner {
       border: 4px solid rgba(0, 0, 0, 0.1);
       border-left-color: #7983ff;
@@ -45,25 +51,42 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 10px;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
+
     .cute-text {
       font-size: 1.2rem;
       color: #333;
       animation: bounce 1s infinite;
     }
+
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
     }
+
     .emoji {
       font-size: 2rem;
       animation: rotate 2s linear infinite;
     }
+
     @keyframes rotate {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
+
     .drop-container {
       position: relative;
       display: flex;
@@ -81,13 +104,16 @@
       background: #f9f9f9;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .drop-container:hover {
       background: #eee;
       border-color: #111;
     }
+
     .drop-container:hover .drop-title {
       color: #222;
     }
+
     .drop-title {
       color: #444;
       font-size: 20px;
@@ -95,6 +121,7 @@
       text-align: center;
       transition: color .2s ease-in-out;
     }
+
     input[type=file] {
       width: 350px;
       max-width: 100%;
@@ -105,6 +132,7 @@
       border: 1px solid #555;
       cursor: pointer;
     }
+
     input[type=file]::file-selector-button {
       margin-right: 20px;
       border: none;
@@ -116,61 +144,71 @@
       transition: background .2s ease-in-out, transform .2s ease-in-out;
       font-weight: bold;
     }
+
     input[type=file]::file-selector-button:hover {
       background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
       transform: scale(1.05);
     }
+
     .drop-container.drag-active {
       background: #eee;
       border-color: #111;
     }
+
     .drop-container.drag-active .drop-title {
       color: #222;
     }
   </style>
 </head>
+
 <body class="min-h-screen p-8" onload="init()">
+  <!-- Loader -->
   <div id="loader" class="flex">
     <div class="loader-content">
       <div class="emoji">🐶</div>
       <div class="spinner"></div>
-      <p class="cute-text">Loading... Please wait! 🌟</p>
+      <p class="cute-text">กำลังโหลด... รอสักครู่! 🌟</p>
     </div>
   </div>
+
+  <!-- Main Content -->
   <div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-bold text-center mb-8 text-purple-700">LINE Rich Menu Manager V.6.8</h1>
+    <h1 class="text-4xl font-bold text-center mb-8 text-purple-700">LINE Rich Menu Manager V.8.8</h1>
 
     <!-- Token Management Section -->
     <div class="bg-white p-6 rounded-xl shadow-lg mb-8 card">
-      <h2 class="text-2xl font-semibold mb-4 text-indigo-600">Channel Access Token Management</h2>
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600">จัดการ Channel Access Token</h2>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">LINE Bot Name</label>
-          <input id="nameInput" type="text" class="w-full border rounded p-2" placeholder="Enter Bot Name">
+          <label class="block text-sm font-medium text-gray-700">ชื่อ LINE Bot</label>
+          <input id="nameInput" type="text" class="w-full border rounded p-2" placeholder="กรอกชื่อ Bot">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Channel Access Token</label>
-          <input id="tokenInput" type="text" class="w-full border rounded p-2" placeholder="Enter or select token">
+          <input id="tokenInput" type="text" class="w-full border rounded p-2" placeholder="กรอกหรือเลือก Token">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Select LINE Bot</label>
+          <label class="block text-sm font-medium text-gray-700">เลือก LINE Bot</label>
           <select id="tokenSelect" class="w-full border rounded p-2">
-            <option value="">Select Bot</option>
+            <option value="">เลือก Bot</option>
           </select>
         </div>
         <div class="flex items-end">
-          <button onclick="saveNewToken()" class="btn bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-2 px-4 rounded-full">Save Token to Sheet</button>
+          <button onclick="saveNewToken()"
+            class="btn bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-2 px-4 rounded-full">บันทึก
+            Token</button>
         </div>
       </div>
     </div>
 
     <!-- Form Section -->
     <div class="bg-white p-6 rounded-xl shadow-lg mb-8 card">
-      <h2 class="text-2xl font-semibold mb-4 text-blue-600">Create / Manage Rich Menu</h2>
+      <h2 class="text-2xl font-semibold mb-4 text-blue-600">สร้าง / จัดการ Rich Menu</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">JSON Rich Menu</label>
-          <textarea id="jsonInput" class="w-full h-40 border rounded p-2" placeholder='{"size": {"width": 2500, "height": 1686}, "selected": true, ...}'></textarea>
+          <textarea id="jsonInput" class="w-full h-40 border rounded p-2"
+            placeholder='{"size": {"width": 2500, "height": 1686}, "selected": true, ...}'></textarea>
         </div>
         <label for="images" class="drop-container" id="dropcontainer">
           <span class="drop-title">วางไฟล์ที่นี่</span>
@@ -180,90 +218,136 @@
       </div>
       <div class="mt-4 grid grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Rich Menu ID (from LINE)</label>
-          <input id="richMenuId" type="text" class="w-full border rounded p-2" placeholder="e.g., richmenu-1234567890">
+          <label class="block text-sm font-medium text-gray-700">Rich Menu ID</label>
+          <input id="richMenuId" type="text" class="w-full border rounded p-2" placeholder="เช่น richmenu-1234567890">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Rich Menu Alias</label>
-          <input id="alias" type="text" class="w-full border rounded p-2" placeholder="e.g., main-menu">
+          <input id="alias" type="text" class="w-full border rounded p-2" placeholder="เช่น main-menu">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">User ID (for Link/Unlink)</label>
-          <input id="userId" type="text" class="w-full border rounded p-2" placeholder="e.g., U1234567890">
+          <label class="block text-sm font-medium text-gray-700">User ID</label>
+          <input id="userId" type="text" class="w-full border rounded p-2" placeholder="เช่น U1234567890">
         </div>
       </div>
       <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button onclick="handleCreate()" class="btn bg-gradient-to-r from-green-400 to-blue-500 text-white py-2 px-4 rounded-full">Create Rich Menu</button>
-        <button onclick="handleUploadImage()" class="btn bg-gradient-to-r from-purple-400 to-pink-500 text-white py-2 px-4 rounded-full">Upload Image</button>
-        <button onclick="handleSetAlias()" class="btn bg-gradient-to-r from-indigo-400 to-blue-500 text-white py-2 px-4 rounded-full">Set Alias</button>
-        <button onclick="handleSetDefault()" class="btn bg-gradient-to-r from-green-500 to-teal-400 text-white py-2 px-4 rounded-full">Set Default</button>
-        <button onclick="handleDeleteAlias()" class="btn bg-gradient-to-r from-red-400 to-orange-500 text-white py-2 px-4 rounded-full">Delete Alias</button>
-        <button onclick="handleDeleteRichMenu()" class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white py-2 px-4 rounded-full">Delete Rich Menu</button>
-        <!-- <button onclick="handleSetAlarmDefault()" class="btn bg-gradient-to-r from-cyan-400 to-blue-500 text-white py-2 px-4 rounded-full">Set Alarm Default</button> -->
-        <button onclick="handleLinkToUser()" class="btn bg-gradient-to-r from-lime-400 to-green-500 text-white py-2 px-4 rounded-full">Link to User</button>
-        <button onclick="handleUnlinkFromUser()" class="btn bg-gradient-to-r from-orange-400 to-red-500 text-white py-2 px-4 rounded-full">Unlink from User</button>
-        <button onclick="handleCancelDefault()" class="btn bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-full">Cancel Default</button>
-        <button onclick="handleDeleteAllRichMenu()" class="btn bg-gradient-to-r from-red-500 to-black text-white py-2 px-4 rounded-full">Delete All Rich Menu</button>
+        <button onclick="handleCreate()"
+          class="btn bg-gradient-to-r from-green-400 to-blue-500 text-white py-2 px-4 rounded-full">สร้าง Rich
+          Menu</button>
+        <button onclick="handleUploadImage()"
+          class="btn bg-gradient-to-r from-purple-400 to-pink-500 text-white py-2 px-4 rounded-full">อัปโหลดภาพ</button>
+        <button onclick="handleSetAlias()"
+          class="btn bg-gradient-to-r from-indigo-400 to-blue-500 text-white py-2 px-4 rounded-full">ตั้งค่า
+          Alias</button>
+        <button onclick="handleSetDefault()"
+          class="btn bg-gradient-to-r from-green-500 to-teal-400 text-white py-2 px-4 rounded-full">ตั้งเป็น
+          Default</button>
+        <button onclick="handleDeleteAlias()"
+          class="btn bg-gradient-to-r from-red-400 to-orange-500 text-white py-2 px-4 rounded-full">ลบ Alias</button>
+        <button onclick="handleDeleteRichMenu()"
+          class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white py-2 px-4 rounded-full">ลบ Rich Menu</button>
+        <button onclick="handleLinkToUser()"
+          class="btn bg-gradient-to-r from-lime-400 to-green-500 text-white py-2 px-4 rounded-full">ลิงก์กับผู้ใช้</button>
+        <button onclick="handleUnlinkFromUser()"
+          class="btn bg-gradient-to-r from-orange-400 to-red-500 text-white py-2 px-4 rounded-full">ยกเลิกลิงก์</button>
+        <button onclick="handleCancelDefault()"
+          class="btn bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-full">ยกเลิก
+          Default</button>
+        <button onclick="handleDeleteAllRichMenu()"
+          class="btn bg-gradient-to-r from-red-500 to-black text-white py-2 px-4 rounded-full">ลบทั้งหมด</button>
       </div>
       <div id="response" class="mt-4 p-4 bg-gray-100 rounded"></div>
     </div>
 
-    <!-- List Section (CRUD) -->
+    <!-- List Section -->
     <div class="bg-white p-6 rounded-xl shadow-lg card">
-      <h2 class="text-2xl font-semibold mb-4 text-green-600">Rich Menus List</h2>
-      <button onclick="refreshList()" class="btn bg-blue-500 text-white py-2 px-4 rounded-full mb-4">Refresh List from API</button>
+      <h2 class="text-2xl font-semibold mb-4 text-green-600">รายการ Rich Menus</h2>
+      <button onclick="refreshList()"
+        class="btn bg-blue-500 text-white py-2 px-4 rounded-full mb-4">รีเฟรชรายการ</button>
       <div id="richmenuList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
     </div>
   </div>
-  <footer style="color: green; padding: 10px; text-align: center; width: 100%; bottom: 0; left: 0;">
+
+  <!-- Footer -->
+  <footer class="text-green-600 p-4 text-center w-full">
     <center>
-      <img src="https://aliyahaunjo.github.io/image/kruaun.png" width="30px">©️ พัฒนาโดย ครูอั๋น ใจดี : <span id="year"></span>
+      <img src="https://aliyahaunjo.github.io/image/kruaun.png" width="30px" alt="ครูอั๋น">
     </center>
+    © พัฒนาโดย ครูอั๋น ใจดี : <span id="year"></span>
   </footer>
 
   <script>
-    const supabase = Supabase.createClient('https://mihtvcbzguzkvfwnlnem.supabase.co/functions/v1/richmenu-service');
+    const BASE_URL = 'https://mihtvcbzguzkvfwnlnem.supabase.co/functions/v1/richmenu-service';
 
+    // เริ่มต้นหน้าเว็บ
     function init() {
-      populateTokens();
-      refreshList();
-      const d = new Date();
-      document.getElementById('year').textContent = d.toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
-      const dropContainer = document.getElementById("dropcontainer");
-      const fileInput = document.getElementById("images");
-      dropContainer.addEventListener("dragover", (e) => e.preventDefault(), false);
-      dropContainer.addEventListener("dragenter", () => dropContainer.classList.add("drag-active"));
-      dropContainer.addEventListener("dragleave", () => dropContainer.classList.remove("drag-active"));
-      dropContainer.addEventListener("drop", (e) => {
+      try {
+        populateTokens();
+        refreshList();
+        document.getElementById('year').textContent = new Date().toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        setupDragAndDrop();
+      } catch (err) {
+        showResponse(`ข้อผิดพลาดในการเริ่มต้น: ${err.message}`, false);
+      }
+    }
+
+    // ตั้งค่า drag-and-drop
+    function setupDragAndDrop() {
+      const dropContainer = document.getElementById('dropcontainer');
+      const fileInput = document.getElementById('images');
+      dropContainer.addEventListener('dragover', (e) => e.preventDefault());
+      dropContainer.addEventListener('dragenter', () => dropContainer.classList.add('drag-active'));
+      dropContainer.addEventListener('dragleave', () => dropContainer.classList.remove('drag-active'));
+      dropContainer.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropContainer.classList.remove("drag-active");
+        dropContainer.classList.remove('drag-active');
         fileInput.files = e.dataTransfer.files;
       });
     }
 
-    function showLoader() {
-      document.getElementById('loader').style.display = 'flex';
-    }
+    // แสดง/ซ่อน loader
+    function showLoader() { document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
 
-    function hideLoader() {
-      document.getElementById('loader').style.display = 'none';
-    }
-
+    // แสดง confetti
     function shootConfetti() {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
 
-    function setIdToInput(id) {
-      document.getElementById('richMenuId').value = id;
+    // แสดงข้อความ response
+    function showResponse(message, isSuccess) {
+      const respDiv = document.createElement('div');
+      respDiv.className = `p-2 rounded ${isSuccess ? 'bg-green-200' : 'bg-red-200'}`;
+      respDiv.textContent = message;
+      const responseDiv = document.getElementById('response');
+      responseDiv.innerHTML = '';
+      responseDiv.appendChild(respDiv);
+      if (isSuccess) shootConfetti();
     }
 
+    // ตรวจสอบ token
+    function getToken() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) {
+        showResponse('กรุณากรอกหรือเลือก Channel Access Token', false);
+        throw new Error('ไม่มี token');
+      }
+      return token;
+    }
+
+    // ดึง tokens
     async function populateTokens() {
       showLoader();
       try {
-        const { data, error } = await supabase.functions.invoke('get-tokens', { method: 'GET' });
-        if (error) throw error;
+        const response = await fetch(`${BASE_URL}/get-tokens`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error(`การดึง tokens ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
         const select = document.getElementById('tokenSelect');
-        select.innerHTML = '<option value="">Select Bot</option>';
+        select.innerHTML = '<option value="">เลือก Bot</option>';
         data.forEach(t => {
           const option = document.createElement('option');
           option.value = t.token;
@@ -273,341 +357,330 @@
         select.addEventListener('change', () => {
           document.getElementById('tokenInput').value = select.value;
         });
-        shootConfetti();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาดในการดึง tokens: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // บันทึก token
     async function saveNewToken() {
       const name = document.getElementById('nameInput').value.trim();
       const token = document.getElementById('tokenInput').value.trim();
-      if (!name || !token) return alert('Please enter both Bot Name and Token');
+      if (!name || !token) return showResponse('กรุณากรอกทั้งชื่อ Bot และ Token', false);
       showLoader();
       try {
-        const { error } = await supabase.functions.invoke('save-token', {
+        const response = await fetch(`${BASE_URL}/save-token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, token }),
-          method: 'POST'
         });
-        if (error) throw error;
+        const data = await response.json();
+        if (!response.ok) throw new Error(`การบันทึก token ล้มเหลว: ${response.status} ${response.statusText}`);
+        if (!data.success) throw new Error(data.error || 'การบันทึก token ล้มเหลว');
         await populateTokens();
-        alert('Token saved to database');
+        showResponse('บันทึก Token สำเร็จ', true);
         document.getElementById('nameInput').value = '';
         document.getElementById('tokenInput').value = '';
-        shootConfetti();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาดในการบันทึก token: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
-    function showResponse(message, isSuccess) {
-      const respDiv = document.createElement('div');
-      respDiv.className = `p-2 rounded ${isSuccess ? 'bg-green-200' : 'bg-red-200'}`;
-      respDiv.textContent = message;
-      document.getElementById('response').appendChild(respDiv);
-      if (isSuccess) shootConfetti();
-    }
-
-    function getToken() {
-      const token = document.getElementById('tokenInput').value.trim();
-      if (!token) {
-        showResponse('Please enter or select a Channel Access Token', false);
-        throw new Error('No token');
-      }
-      return token;
-    }
-
+    // สร้าง rich menu
     async function handleCreate() {
       try {
         const token = getToken();
-        const json = document.getElementById('jsonInput').value;
+        const json = document.getElementById('jsonInput').value.trim();
+        if (!json) throw new Error('กรุณากรอก JSON Rich Menu');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('create-rich-menu', {
+        const response = await fetch(`${BASE_URL}/create-rich-menu`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ json, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? `Created ID: ${data.data.richMenuId}` : data.error, data.success);
+        if (!response.ok) throw new Error(`การสร้าง rich menu ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? `สร้าง Rich Menu สำเร็จ: ${data.data.richMenuId}` : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // อัปโหลดภาพ rich menu
     async function handleUploadImage() {
       try {
         const token = getToken();
-        const id = document.getElementById('richMenuId').value;
+        const id = document.getElementById('richMenuId').value.trim();
         const fileInput = document.getElementById('images');
         const file = fileInput.files[0];
-        if (!file) {
-          showResponse('Please select an image file', false);
-          return;
-        }
-        if (file.size > 1024 * 1024) {
-          showResponse('File size exceeds 1MB limit', false);
-          return;
-        }
+        if (!id) throw new Error('กรุณากรอก Rich Menu ID');
+        if (!file) throw new Error('กรุณาเลือกไฟล์ภาพ');
+        if (file.size > 1024 * 1024) throw new Error('ขนาดไฟล์เกิน 1MB');
         showLoader();
         const reader = new FileReader();
-        reader.onload = async function(e) {
-          const base64 = e.target.result.split(',')[1];
+        reader.onload = async (e) => {
+          let base64 = e.target.result;
+          if (typeof base64 !== 'string') {
+            showResponse('ข้อผิดพลาด: ไฟล์ภาพไม่ถูกต้อง', false);
+            hideLoader();
+            return;
+          }
+          // ลบ header ถ้ามี (data:image/png;base64,)
+          if (base64.startsWith('data:image')) {
+            base64 = base64.split(',')[1];
+          }
           try {
-            const { data, error } = await supabase.functions.invoke('upload-rich-menu-image', {
+            const response = await fetch(`${BASE_URL}/upload-rich-menu-image`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ richMenuId: id, base64, token }),
-              method: 'POST'
             });
-            if (error) throw error;
-            showResponse(data.success ? 'Image uploaded' : data.error, data.success);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || `การอัปโหลดภาพล้มเหลว: ${response.status} ${response.statusText}`);
+            showResponse(data.success ? 'อัปโหลดภาพสำเร็จ' : `ข้อผิดพลาด: ${data.error}`, data.success);
+            await refreshList();
           } catch (err) {
-            showResponse('Error: ' + err.message, false);
+            showResponse(`ข้อผิดพลาด: ${err.message}`, false);
           } finally {
             hideLoader();
           }
         };
-        reader.onerror = function() {
-          showResponse('Error reading file', false);
+        reader.onerror = () => {
+          showResponse('ข้อผิดพลาดในการอ่านไฟล์', false);
           hideLoader();
         };
         reader.readAsDataURL(file);
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
         hideLoader();
       }
     }
 
+    // ตั้งค่า alias
     async function handleSetAlias() {
       try {
         const token = getToken();
-        const id = document.getElementById('richMenuId').value;
-        const alias = document.getElementById('alias').value;
+        const id = document.getElementById('richMenuId').value.trim();
+        const alias = document.getElementById('alias').value.trim();
+        if (!id || !alias) throw new Error('กรุณากรอก Rich Menu ID และ Alias');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('set-rich-menu-alias', {
+        const response = await fetch(`${BASE_URL}/set-rich-menu-alias`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ richMenuId: id, alias, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Alias set' : data.error, data.success);
+        if (!response.ok) throw new Error(`การตั้งค่า alias ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ตั้งค่า Alias สำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
-    async function handleSetDefault() {
+    // ตั้งเป็น default rich menu
+    async function handleSetDefault(richMenuId = null) {
       try {
         const token = getToken();
-        const id = document.getElementById('richMenuId').value;
+        const id = richMenuId || document.getElementById('richMenuId').value.trim();
+        if (!id) throw new Error('กรุณากรอก Rich Menu ID');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('set-default-rich-menu', {
+        const response = await fetch(`${BASE_URL}/set-default-rich-menu`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ richMenuId: id, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Set as default' : data.error, data.success);
+        if (!response.ok) throw new Error(`การตั้งค่า default ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ตั้งเป็น Default สำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // ลบ alias
     async function handleDeleteAlias() {
       try {
         const token = getToken();
-        const alias = document.getElementById('alias').value;
+        const alias = document.getElementById('alias').value.trim();
+        if (!alias) throw new Error('กรุณากรอก Alias');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('delete-rich-menu-alias', {
+        const response = await fetch(`${BASE_URL}/delete-rich-menu-alias`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ alias, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Alias deleted' : data.error, data.success);
+        if (!response.ok) throw new Error(`การลบ alias ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ลบ Alias สำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
-    async function handleDeleteRichMenu() {
+    // ลบ rich menu
+    async function handleDeleteRichMenu(richMenuId = null) {
       try {
         const token = getToken();
-        const id = document.getElementById('richMenuId').value;
+        const id = richMenuId || document.getElementById('richMenuId').value.trim();
+        if (!id) throw new Error('กรุณากรอก Rich Menu ID');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('delete-rich-menu', {
+        const response = await fetch(`${BASE_URL}/delete-rich-menu`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ richMenuId: id, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Rich Menu deleted' : data.error, data.success);
+        if (!response.ok) throw new Error(`การลบ rich menu ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ลบ Rich Menu สำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // ลิงก์ rich menu กับผู้ใช้
     async function handleLinkToUser() {
       try {
         const token = getToken();
-        const userId = document.getElementById('userId').value;
-        const richMenuId = document.getElementById('richMenuId').value;
+        const userId = document.getElementById('userId').value.trim();
+        const richMenuId = document.getElementById('richMenuId').value.trim();
+        if (!userId || !richMenuId) throw new Error('กรุณากรอก User ID และ Rich Menu ID');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('link-rich-menu-to-user', {
+        const response = await fetch(`${BASE_URL}/link-rich-menu-to-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, richMenuId, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Linked to User' : data.error, data.success);
+        if (!response.ok) throw new Error(`การลิงก์กับผู้ใช้ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ลิงก์กับผู้ใช้สำเร็จ' : data.error, data.success);
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // ยกเลิกลิงก์จากผู้ใช้
     async function handleUnlinkFromUser() {
       try {
         const token = getToken();
-        const userId = document.getElementById('userId').value;
+        const userId = document.getElementById('userId').value.trim();
+        if (!userId) throw new Error('กรุณากรอก User ID');
         showLoader();
-        const { data, error } = await supabase.functions.invoke('unlink-rich-menu-from-user', {
+        const response = await fetch(`${BASE_URL}/unlink-rich-menu-from-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Unlinked from User' : data.error, data.success);
+        if (!response.ok) throw new Error(`การยกเลิกลิงก์ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ยกเลิกลิงก์สำเร็จ' : data.error, data.success);
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // ยกเลิก default rich menu
     async function handleCancelDefault() {
       try {
         const token = getToken();
         showLoader();
-        const { data, error } = await supabase.functions.invoke('cancel-default-rich-menu', {
+        const response = await fetch(`${BASE_URL}/cancel-default-rich-menu`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Cancelled Default' : data.error, data.success);
+        if (!response.ok) throw new Error(`การยกเลิก default ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ยกเลิก Default สำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // ลบ rich menus ทั้งหมด
     async function handleDeleteAllRichMenu() {
       try {
         const token = getToken();
         showLoader();
-        const { data, error } = await supabase.functions.invoke('delete-all-rich-menus', {
+        const response = await fetch(`${BASE_URL}/delete-all-rich-menus`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        showResponse(data.success ? 'Deleted All Rich Menu' : data.error, data.success);
+        if (!response.ok) throw new Error(`การลบ rich menus ทั้งหมดล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        showResponse(data.success ? 'ลบ Rich Menus ทั้งหมดสำเร็จ' : data.error, data.success);
         await refreshList();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
       }
     }
 
+    // รีเฟรชรายการ rich menus
     async function refreshList() {
       try {
         const token = getToken();
         showLoader();
-        const { data, error } = await supabase.functions.invoke('fetch-rich-menus', {
+        const response = await fetch(`${BASE_URL}/fetch-rich-menus`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
-          method: 'POST'
         });
-        if (error) throw error;
-        if (data.error) {
-          showResponse(data.error, false);
-          return;
-        }
+        if (!response.ok) throw new Error(`การดึง rich menus ล้มเหลว: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
         const container = document.getElementById('richmenuList');
         container.innerHTML = '';
         data.forEach(item => {
-          const imgSrc = item.base64 ? `data:image/png;base64,${item.base64}` : '';
+          const imgSrc = item.base64_image ? `data:image/png;base64,${item.base64_image}` : '';
           const card = document.createElement('div');
           card.className = 'p-4 border rounded-lg bg-white shadow-md';
           card.innerHTML = `
             <img src="${imgSrc}" alt="Rich Menu Image" class="w-full h-32 object-cover mb-2 rounded">
-            <p><strong>ID:</strong> <span onclick="setIdToInput('${item.id}')" class="cursor-pointer text-blue-500 underline">${item.id}</span></p>
-            <p><strong>Chat Bar Text:</strong> ${item.chatBarText}</p>
-            <p><strong>Alias:</strong> ${item.alias}</p>
-            <p><strong>Size:</strong> ${item.size.width}x${item.size.height}</p>
-            <p><strong>Status:</strong> ${item.selected ? 'Active' : 'No'}</p>
-            <button onclick="setAsDefault('${item.id}')" class="btn bg-teal-400 text-white py-1 px-2 rounded mt-2">Set Default</button>
-            <button onclick="deleteThis('${item.id}')" class="btn bg-red-400 text-white py-1 px-2 rounded mt-2">Delete</button>
+            <p><strong>ID:</strong> <span onclick="document.getElementById('richMenuId').value='${item.id}'" class="cursor-pointer text-blue-500 underline">${item.id}</span></p>
+            <p><strong>ข้อความ Chat Bar:</strong> ${item.chat_bar_text || 'ไม่มี'}</p>
+            <p><strong>Alias:</strong> ${item.alias || 'ไม่มี'}</p>
+            <p><strong>ขนาด:</strong> ${item.size_width}x${item.size_height}</p>
+            <p><strong>สถานะ:</strong> ${item.is_active ? 'ใช้งาน' : 'ไม่ใช้งาน'}</p>
+            <button onclick="handleSetDefault('${item.id}')" class="btn bg-teal-400 text-white py-1 px-2 rounded mt-2">ตั้งเป็น Default</button>
+            <button onclick="handleDeleteRichMenu('${item.id}')" class="btn bg-red-400 text-white py-1 px-2 rounded mt-2">ลบ</button>
           `;
           container.appendChild(card);
         });
-        shootConfetti();
       } catch (err) {
-        showResponse('Error: ' + err.message, false);
+        showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
         hideLoader();
-      }
-    }
-
-    async function setAsDefault(id) {
-      try {
-        const token = getToken();
-        showLoader();
-        const { data, error } = await supabase.functions.invoke('set-default-rich-menu', {
-          body: JSON.stringify({ richMenuId: id, token }),
-          method: 'POST'
-        });
-        if (error) throw error;
-        await refreshList();
-        shootConfetti();
-      } catch (err) {
-        showResponse('Error: ' + err.message, false);
-      } finally {
-        hideLoader();
-      }
-    }
-
-    async function deleteThis(id) {
-      if (confirm('Confirm delete?')) {
-        try {
-          const token = getToken();
-          showLoader();
-          const { data, error } = await supabase.functions.invoke('delete-rich-menu', {
-            body: JSON.stringify({ richMenuId: id, token }),
-            method: 'POST'
-          });
-          if (error) throw error;
-          await refreshList();
-          shootConfetti();
-        } catch (err) {
-          showResponse('Error: ' + err.message, false);
-        } finally {
-          hideLoader();
-        }
       }
     }
   </script>
 </body>
+
 </html>
