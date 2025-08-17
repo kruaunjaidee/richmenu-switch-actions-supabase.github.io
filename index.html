@@ -65,12 +65,9 @@
     }
 
     @keyframes bounce {
-
-      0%,
-      100% {
+      0%, 100% {
         transform: translateY(0);
       }
-
       50% {
         transform: translateY(-5px);
       }
@@ -158,6 +155,16 @@
     .drop-container.drag-active .drop-title {
       color: #222;
     }
+
+    .placeholder-image {
+      background-color: #f0f0f0;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -173,10 +180,9 @@
 
   <!-- Main Content -->
   <div class="max-w-6xl mx-auto">
-      <div class="flex">
+    <div class="flex">
       <img style="width: 40px; height: 40px;" src="https://mihtvcbzguzkvfwnlnem.supabase.co/storage/v1/object/public/user-images/U5447c1a665091d4cc01803728afeef61/line.png" alt="">
-      <h1 class="text-4xl font-bold text-center mb-8 text-green-500">&nbsp; LINE <span class="text-purple-500">Rich Menu Manager
-        </span> <span class="text-blue-500">V.8.8</span></h1>
+      <h1 class="text-4xl font-bold text-center mb-8 text-green-500">&nbsp; LINE <span class="text-purple-500">Rich Menu Manager</span> <span class="text-blue-500">V.8.8</span></h1>
     </div>
     
     <!-- Token Management Section -->
@@ -198,9 +204,7 @@
           </select>
         </div>
         <div class="flex items-end">
-          <button onclick="saveNewToken()"
-            class="btn bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-2 px-4 rounded-full">บันทึก
-            Token</button>
+          <button onclick="saveNewToken()" class="btn bg-gradient-to-r from-blue-400 to-indigo-500 text-white py-2 px-4 rounded-full">บันทึก Token</button>
         </div>
       </div>
     </div>
@@ -211,8 +215,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">JSON Rich Menu</label>
-          <textarea id="jsonInput" class="w-full h-40 border rounded p-2"
-            placeholder='{"size": {"width": 2500, "height": 1686}, "selected": true, ...}'></textarea>
+          <textarea id="jsonInput" class="w-full h-40 border rounded p-2" placeholder='{"size": {"width": 2500, "height": 1686}, "selected": true, ...}'></textarea>
         </div>
         <label for="images" class="drop-container" id="dropcontainer">
           <span class="drop-title">วางไฟล์ที่นี่</span>
@@ -235,30 +238,16 @@
         </div>
       </div>
       <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button onclick="handleCreate()"
-          class="btn bg-gradient-to-r from-green-400 to-blue-500 text-white py-2 px-4 rounded-full">สร้าง Rich
-          Menu</button>
-        <button onclick="handleUploadImage()"
-          class="btn bg-gradient-to-r from-purple-400 to-pink-500 text-white py-2 px-4 rounded-full">อัปโหลดภาพ</button>
-        <button onclick="handleSetAlias()"
-          class="btn bg-gradient-to-r from-indigo-400 to-blue-500 text-white py-2 px-4 rounded-full">ตั้งค่า
-          Alias</button>
-        <button onclick="handleSetDefault()"
-          class="btn bg-gradient-to-r from-green-500 to-teal-400 text-white py-2 px-4 rounded-full">ตั้งเป็น
-          Default</button>
-        <button onclick="handleDeleteAlias()"
-          class="btn bg-gradient-to-r from-red-400 to-orange-500 text-white py-2 px-4 rounded-full">ลบ Alias</button>
-        <button onclick="handleDeleteRichMenu()"
-          class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white py-2 px-4 rounded-full">ลบ Rich Menu</button>
-        <button onclick="handleLinkToUser()"
-          class="btn bg-gradient-to-r from-lime-400 to-green-500 text-white py-2 px-4 rounded-full">ลิงก์กับผู้ใช้</button>
-        <button onclick="handleUnlinkFromUser()"
-          class="btn bg-gradient-to-r from-orange-400 to-red-500 text-white py-2 px-4 rounded-full">ยกเลิกลิงก์</button>
-        <button onclick="handleCancelDefault()"
-          class="btn bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-full">ยกเลิก
-          Default</button>
-        <button onclick="handleDeleteAllRichMenu()"
-          class="btn bg-gradient-to-r from-red-500 to-black text-white py-2 px-4 rounded-full">ลบทั้งหมด</button>
+        <button onclick="handleCreate()" class="btn bg-gradient-to-r from-green-400 to-blue-500 text-white py-2 px-4 rounded-full">สร้าง Rich Menu</button>
+        <button onclick="handleUploadImage()" class="btn bg-gradient-to-r from-purple-400 to-pink-500 text-white py-2 px-4 rounded-full">อัปโหลดภาพ</button>
+        <button onclick="handleSetAlias()" class="btn bg-gradient-to-r from-indigo-400 to-blue-500 text-white py-2 px-4 rounded-full">ตั้งค่า Alias</button>
+        <button onclick="handleSetDefault()" class="btn bg-gradient-to-r from-green-500 to-teal-400 text-white py-2 px-4 rounded-full">ตั้งเป็น Default</button>
+        <button onclick="handleDeleteAlias()" class="btn bg-gradient-to-r from-red-400 to-orange-500 text-white py-2 px-4 rounded-full">ลบ Alias</button>
+        <button onclick="handleDeleteRichMenu()" class="btn bg-gradient-to-r from-pink-500 to-red-600 text-white py-2 px-4 rounded-full">ลบ Rich Menu</button>
+        <button onclick="handleLinkToUser()" class="btn bg-gradient-to-r from-lime-400 to-green-500 text-white py-2 px-4 rounded-full">ลิงก์กับผู้ใช้</button>
+        <button onclick="handleUnlinkFromUser()" class="btn bg-gradient-to-r from-orange-400 to-red-500 text-white py-2 px-4 rounded-full">ยกเลิกลิงก์</button>
+        <button onclick="handleCancelDefault()" class="btn bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-full">ยกเลิก Default</button>
+        <button onclick="handleDeleteAllRichMenu()" class="btn bg-gradient-to-r from-red-500 to-black text-white py-2 px-4 rounded-full">ลบทั้งหมด</button>
       </div>
       <div id="response" class="mt-4 p-4 bg-gray-100 rounded"></div>
     </div>
@@ -266,8 +255,7 @@
     <!-- List Section -->
     <div class="bg-white p-6 rounded-xl shadow-lg card">
       <h2 class="text-2xl font-semibold mb-4 text-green-600">รายการ Rich Menus</h2>
-      <button onclick="refreshList()"
-        class="btn bg-blue-500 text-white py-2 px-4 rounded-full mb-4">รีเฟรชรายการ</button>
+      <button onclick="refreshList()" class="btn bg-blue-500 text-white py-2 px-4 rounded-full mb-4">รีเฟรชรายการ</button>
       <div id="richmenuList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
     </div>
   </div>
@@ -282,7 +270,7 @@
 
   <script>
     const BASE_URL = 'https://mihtvcbzguzkvfwnlnem.supabase.co/functions/v1/richmenu-service';
-
+    const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/250x168?text=No+Image';
 
     // เริ่มต้นหน้าเว็บ
     function init() {
@@ -336,12 +324,9 @@
       if (!token) {
         showResponse('ไม่มี access token', false);
         throw new Error('ไม่มี token');
-      } else {
-        showResponse('access token พร้อมแล้ว', true);
       }
       return token;
     }
-
 
     // ดึง tokens
     async function populateTokens() {
@@ -365,9 +350,9 @@
         select.addEventListener('change', () => {
           const selectToken = document.getElementById('tokenInput').value = select.value;
           if (selectToken) {
-            showResponse('access token พร้อมแล้ว', true); // Green background for non-empty token
+            showResponse('access token พร้อมแล้ว', true);
           } else {
-            showResponse('ไม่มี access token', false); // Red background for empty token
+            showResponse('ไม่มี access token', false);
           }
         });
       } catch (err) {
@@ -445,7 +430,6 @@
             hideLoader();
             return;
           }
-          // ลบ header ถ้ามี (data:image/png;base64,)
           if (base64.startsWith('data:image')) {
             base64 = base64.split(',')[1];
           }
@@ -669,14 +653,20 @@
         if (!response.ok) throw new Error(`การดึง rich menus ล้มเหลว: ${response.status} ${response.statusText}`);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
+        
         const container = document.getElementById('richmenuList');
         container.innerHTML = '';
-        data.forEach(item => {
-          const imgSrc = item.base64_image ? `data:image/png;base64,${item.base64_image}` : '';
+        
+        for (const item of data) {
+          let imgSrc = PLACEHOLDER_IMAGE;
+          if (item.base64_image && /^[A-Za-z0-9+/=]+$/.test(item.base64_image)) {
+            imgSrc = `data:image/png;base64,${item.base64_image}`;
+          }
+          
           const card = document.createElement('div');
           card.className = 'p-4 border rounded-lg bg-white shadow-md';
           card.innerHTML = `
-            <img src="${imgSrc}" alt="Rich Menu Image" class="w-full h-32 object-cover mb-2 rounded">
+            <img src="${imgSrc}" alt="Rich Menu Image" class="w-full h-32 object-cover mb-2 rounded ${imgSrc === PLACEHOLDER_IMAGE ? 'placeholder-image' : ''}">
             <p><strong>ID:</strong> <span onclick="document.getElementById('richMenuId').value='${item.id}'" class="cursor-pointer text-blue-500 underline">${item.id}</span></p>
             <p><strong>ข้อความ Chat Bar:</strong> ${item.chat_bar_text || 'ไม่มี'}</p>
             <p><strong>Alias:</strong> ${item.alias || 'ไม่มี'}</p>
@@ -686,7 +676,7 @@
             <button onclick="handleDeleteRichMenu('${item.id}')" class="btn bg-red-400 text-white py-1 px-2 rounded mt-2">ลบ</button>
           `;
           container.appendChild(card);
-        });
+        }
       } catch (err) {
         showResponse(`ข้อผิดพลาด: ${err.message}`, false);
       } finally {
@@ -695,5 +685,4 @@
     }
   </script>
 </body>
-
 </html>
