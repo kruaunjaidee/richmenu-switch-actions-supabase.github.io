@@ -24,6 +24,7 @@
         #richmenuList div {
             transition: all 0.3s ease;
         }
+
         #richmenuList div:hover {
             transform: scale(1.05);
         }
@@ -195,7 +196,7 @@
                 src="https://mihtvcbzguzkvfwnlnem.supabase.co/storage/v1/object/public/user-images/U5447c1a665091d4cc01803728afeef61/line.png"
                 alt="">
             <h1 class="text-4xl font-bold text-center mb-8 text-green-500">&nbsp; LINE <span
-                    class="text-purple-500">Rich Menu Manager</span> <span class="text-blue-500">V.8.8</span></h1>
+                    class="text-purple-500">Rich Menu Manager</span> <span class="text-blue-500">V.8.9</span></h1>
         </div>
 
         <!-- Token Management Section -->
@@ -366,6 +367,31 @@
             return token;
         }
 
+        // ตรวจสอบ JSON
+        function validateJSON(jsonString) {
+            try {
+                const parsed = JSON.parse(jsonString);
+                
+                // ตรวจสอบ required fields
+                if (!parsed.size || !parsed.size.width || !parsed.size.height) {
+                    throw new Error('JSON ต้องมี size.width และ size.height');
+                }
+                
+                // ตรวจสอบขนาด
+                if (parsed.size.width < 800 || parsed.size.width > 2500) {
+                    throw new Error('width ต้องอยู่ระหว่าง 800-2500');
+                }
+                
+                if (parsed.size.height < 250) {
+                    throw new Error('height ต้องมากกว่าหรือเท่ากับ 250');
+                }
+                
+                return parsed;
+            } catch (err) {
+                throw new Error(`JSON ไม่ถูกต้อง: ${err.message}`);
+            }
+        }
+
         // ดึง tokens
         async function populateTokens() {
             showLoader();
@@ -374,7 +400,10 @@
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                 });
-                if (!response.ok) throw new Error(`การดึง tokens ล้มเหลว: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`การดึง tokens ล้มเหลว: ${response.status} - ${errorText}`);
+                }
                 const data = await response.json();
                 if (data.error) throw new Error(data.error);
                 const select = document.getElementById('tokenSelect');
@@ -413,7 +442,10 @@
                     body: JSON.stringify({ name, token }),
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(`การบันทึก token ล้มเหลว: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`การบันทึก token ล้มเหลว: ${response.status} - ${errorText}`);
+                }
                 if (!data.success) throw new Error(data.error || 'การบันทึก token ล้มเหลว');
                 await populateTokens();
                 showResponse('บันทึก Token สำเร็จ', true);
@@ -430,19 +462,57 @@
         async function handleCreate() {
             try {
                 const token = getToken();
-                const json = document.getElementById('jsonInput').value.trim();
-                if (!json) throw new Error('กรุณากรอก JSON Rich Menu');
+                const jsonString = document.getElementById('jsonInput').value.trim();
+                
+                if (!jsonString) {
+                    throw new Error('กรุณากรอก JSON Rich Menu');
+                }
+
+                // Validate JSON first
+                console.log('Validating JSON...');
+                const validatedJson = validateJSON(jsonString);
+                console.log('JSON validated:', validatedJson);
+
                 showLoader();
+                
                 const response = await fetch(`${BASE_URL}/create-rich-menu`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ json, token }),
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        json: jsonString, 
+                        token 
+                    }),
                 });
-                if (!response.ok) throw new Error(`การสร้าง rich menu ล้มเหลว: ${response.status} ${response.statusText}`);
-                const data = await response.json();
-                showResponse(data.success ? `สร้าง Rich Menu สำเร็จ: ${data.data.richMenuId}` : data.error, data.success);
+
+                console.log('Response status:', response.status);
+                
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error(`เซิร์ฟเวอร์ตอบกลับไม่ใช่ JSON: ${text.substring(0, 200)}`);
+                }
+
+                console.log('Response data:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.error || `การสร้าง rich menu ล้มเหลว: ${response.status}`);
+                }
+
+                if (!data.success) {
+                    throw new Error(data.error || 'การสร้าง rich menu ล้มเหลว');
+                }
+
+                showResponse(`สร้าง Rich Menu สำเร็จ: ${data.data.richMenuId}`, true);
+                document.getElementById('richMenuId').value = data.data.richMenuId;
                 await refreshList();
             } catch (err) {
+                console.error('handleCreate error:', err);
                 showResponse(`ข้อผิดพลาด: ${err.message}`, false);
             } finally {
                 hideLoader();
@@ -661,6 +731,9 @@
         async function handleDeleteAllRichMenu() {
             try {
                 const token = getToken();
+                if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบ Rich Menu ทั้งหมด?')) {
+                    return;
+                }
                 showLoader();
                 const response = await fetch(`${BASE_URL}/delete-all-rich-menus`, {
                     method: 'POST',
@@ -695,6 +768,11 @@
                 const container = document.getElementById('richmenuList');
                 container.innerHTML = '';
 
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 col-span-3 text-center">ไม่มี Rich Menu</p>';
+                    return;
+                }
+
                 for (const item of data) {
                     let imgSrc = PLACEHOLDER_IMAGE;
                     if (item.base64_image && /^[A-Za-z0-9+/=]+$/.test(item.base64_image)) {
@@ -716,6 +794,7 @@
                     container.appendChild(card);
                 }
             } catch (err) {
+                console.error('refreshList error:', err);
                 showResponse(`ข้อผิดพลาด: ${err.message}`, false);
             } finally {
                 hideLoader();
